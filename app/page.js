@@ -1,95 +1,43 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import LiveMatchList from './components/LiveMatchList'; // LiveMatchList 컴포넌트 임포트
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+    <main>
+      {/* 상단 헤더 섹션 */}
+      <div className="header-bar">
+        <div className="logo">
+          <img src="/images/logo.png" alt="로고" className="logo-image" />
+          </div> 
+        <div className="nav-links">
+          <span>승부식</span> {/* 현재 페이지 */}
+          <span>기록식</span>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <button className="login-button">login</button>
+      </div>
+
+      {/* 상단 정보 섹션 (73회차) */}
+      <div className="current-round-info">
+        <span>73회차</span>
+      </div>
+
+      {/* 금액 입력 및 버튼 섹션 */}
+      <div className="betting-amount-section">
+        <span className="currency-symbol">₩</span>
+        <input type="number" className="amount-input" placeholder="0" />
+        <button className="quick-amount-button">1만</button>
+        <button className="quick-amount-button">5만</button>
+        <button className="quick-amount-button">10만</button>
+        {/* 리셋 버튼은 여기서 분리하여 아래 'action-buttons'로 이동합니다. */}
+      </div>
+
+      {/* --- 변경된 부분: 리셋과 공유 버튼을 감싸는 새로운 div --- */}
+      <div className="action-buttons-container">
+        <button className="reset-button">리셋</button>
+        <button className="share-button">공유</button>
+      </div>
+
+      {/* 라이브 매치 리스트 (메인 콘텐츠 테이블) */}
+      <LiveMatchList />
+    </main>
   );
 }

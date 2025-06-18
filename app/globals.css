@@ -1,42 +1,266 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* app/globals.css */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
+/* 기본 리셋 및 폰트 설정 (선택 사항이지만 일관된 외관에 도움) */
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5; /* 전체 배경색 */
+  color: #333;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+/* 주요 컨테이너 스타일 */
+/* app/globals.css */
+
+/* 기존 스타일 유지 (생략) */
+/* ... */
+
+/* 주요 컨테이너 스타일 */
+main {
+  max-width: 960px; /* 이미지 너비에 맞춰 조절 */
+  margin: 20px auto; /* 중앙 정렬 및 상하 여백 */
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* 상단 바 (로고, 내비게이션, 로그인 버튼) */
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+.header-bar .logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000;
+  flex-grow: 1; /* 로고가 공간을 차지하도록 */
+}
+
+.header-bar .nav-links span {
+  margin: 0 15px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #555;
+  font-weight: bold;
+}
+
+.header-bar .nav-links span:first-child {
+  color: #000; /* '승부식'은 현재 활성화된 것처럼 보이도록 */
+}
+
+.header-bar .login-button {
+  background-color: #eee;
+  border: 1px solid #ccc;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 3px;
+}
+
+.header-bar .login-button:hover {
+  background-color: #e0e0e0;
+}
+
+
+/* 73회차 정보 */
+.current-round-info {
+  display: flex;
+  justify-content: flex-end; /* 우측 정렬 */
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* 금액 입력 및 버튼 섹션 */
+.betting-amount-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  padding: 8px 10px;
+  border-radius: 4px;
+}
+
+.betting-amount-section .currency-symbol {
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 5px;
+  color: #333;
+}
+
+.betting-amount-section .amount-input {
+  border: 1px solid #ccc;
+  padding: 5px 8px;
+  width: 100px; /* 입력 필드 너비 */
+  margin-right: 10px;
+  text-align: right; /* 숫자 오른쪽 정렬 */
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+}
+
+.betting-amount-section .quick-amount-button {
+  background-color: #e0f2f7; /* 연한 파란색 계열 */
+  border: 1px solid #a8d5e0;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-right: 5px;
+  border-radius: 3px;
+  color: #333;
+}
+
+.betting-amount-section .quick-amount-button:hover {
+  background-color: #c9eaf2;
+}
+
+
+/* --- 변경된 부분: 리셋과 공유 버튼 컨테이너 및 버튼 스타일 --- */
+.action-buttons-container {
+  display: flex; /* Flexbox 적용 */
+  justify-content: center; /* 중앙 정렬로 변경 */
+  gap: 10px; /* 버튼들 사이의 간격 */
+  margin-bottom: 20px; /* 아래쪽 여백 */
+  width: 100%; /* 부모 너비 전체 사용 */
+}
+
+.action-buttons-container .reset-button,
+.action-buttons-container .share-button {
+  width: 45%; /* 각각 40% 너비 설정 */
+  /* flex-grow: 1; -> 제거: flex-grow 대신 고정 너비 사용 */
+  max-width: 200px; /* 너무 커지는 것을 방지하기 위해 최대 너비 설정 (조정 가능) */
+  
+  /* 공통 스타일 */
+  color: white;
+  border: none;
+  padding: 6px 0; /* 상하 패딩 늘리고 좌우 패딩 0으로 설정 (너비 40% 사용 위해) */
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 4px;
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+}
+
+/* 리셋 버튼의 고유 스타일 */
+.action-buttons-container .reset-button {
+  background-color: #d9534f; /* 빨간색 계열 */
+}
+
+.action-buttons-container .reset-button:hover {
+  background-color: #c9302c;
+}
+
+/* 공유 버튼의 고유 스타일 */
+.action-buttons-container .share-button {
+  background-color: #5cb85c; /* 초록색 계열 */
+}
+
+.action-buttons-container .share-button:hover {
+  background-color: #4cae4c;
+}
+
+/* 기존 share-button-section 및 reset-button 스타일은 이제 필요 없습니다. */
+/* .share-button-section { display: none; } 또는 삭제 */
+/* .betting-amount-section .reset-button { display: none; } 또는 삭제 */
+/* ----------------------------------------------------------- */
+
+/* 경기 마감 시간 표시 */
+.match-time-header {
+  text-align: center;
+  background-color: #e6f7ff; /* 연한 파란색 배경 */
+  font-weight: bold;
+  padding: 8px;
+  border: 1px solid #cceeff;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* LiveMatchList 컴포넌트의 테이블 스타일 (이전과 동일) */
+table {
+  width: 100%;
+  border-collapse: collapse; /* 셀 경계선 병합 */
+  margin-top: 0; /* 위쪽 여백 조정 */
+  font-size: 11px;
+}
+
+th, td {
+  border: 1px solid #ddd; /* 모든 셀에 경계선 */
+  padding: 8px;
+  text-align: left; /* 기본 텍스트 왼쪽 정렬 */
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+  text-align: center; /* 헤더 텍스트 중앙 정렬 */
+  white-space: nowrap; /* 헤더 텍스트 줄바꿈 방지 */
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9; /* 짝수 행 배경색 */
+}
+
+tr:hover {
+  background-color: #f1f1f1; /* 호버 시 배경색 */
+}
+
+/* 특정 열 정렬 조정 */
+td:nth-child(1), /* No. */
+td:nth-child(5), /* 경기 시작 시각 */
+td:nth-child(6), /* 승 */
+td:nth-child(7), /* 무 */
+td:nth-child(8)  /* 패 */ {
+    text-align: center; /* 숫자나 시각은 중앙 정렬이 더 나을 수 있음 */
+}
+
+/* 이미지에 보이는 배당률 부분 */
+.rate-cell {
+  font-weight: bold;
+  color: #333;
+}
+
+/* 배당률 변경 화살표 */
+.rate-up {
+    color: #dc3545; /* 빨간색 (상승) */
+    font-size: 12px;
+    margin-left: 3px;
+}
+
+.rate-down {
+    color: #007bff; /* 파란색 (하락) */
+    font-size: 12px;
+    margin-left: 3px;
+}
+
+/* '*' 표시가 있는 행 스타일 */
+.match-starred td {
+    background-color: #fffacd; /* LightGoldenrodYellow */
+}
+
+/* 모바일 반응형 (선택 사항: 필요시 추가) */
+@media (max-width: 768px) {
+  main {
+    margin: 10px;
+    padding: 10px;
+  }
+  .betting-amount-section {
+    flex-wrap: wrap; /* 작은 화면에서 줄바꿈 */
+  }
+  .betting-amount-section button {
+    margin-top: 5px;
+  }
+  
+  .action-buttons-container .reset-button,
+  .action-buttons-container .share-button {
+    max-width: none; /* 너비 제한 해제 */
   }
 }
