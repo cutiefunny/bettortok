@@ -6,16 +6,11 @@ export async function POST(request) {
 
     // *** 중요: 여기서 요청 본문(body)에서 schDate를 가져와야 합니다. ***
     const requestBodyFromClient = await request.json(); // 클라이언트에서 보낸 JSON 본문을 파싱
-    const schDate = requestBodyFromClient.schDate; // schDate 값 추출
+    let schDate = requestBodyFromClient.schDate; // schDate 값 추출
 
     // 만약 schDate가 없으면 기본값 설정 (선택 사항)
     if (!schDate) {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      schDate = `${year}.${month}.${day}`;
-      console.warn("schDate not provided in request body, using current date:", schDate);
+      schDate = `2025.06.19`;
     }
     // ***************************************************************
 

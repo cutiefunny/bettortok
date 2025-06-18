@@ -1,7 +1,8 @@
 import React from 'react';
 
 async function getLiveMatches() {
-  const localApiUrl = 'http://localhost:3000/api/matchlist'; // API 라우트 경로
+  // --- 변경된 부분: 외부 API URL로 직접 변경 ---
+  const externalApiUrl = 'https://www.betman.co.kr/matchinfo/inqMainLivescreMchList.do';
 
   // KST를 고려하여 Date 객체를 생성하는 헬퍼 함수
   const parseMatchDateTimeKST = (dtmString) => {
@@ -30,56 +31,64 @@ async function getLiveMatches() {
     const tomorrowDay = String(tomorrow.getDate()).padStart(2, '0');
     const tomorrowSchDate = `${tomorrowYear}.${tomorrowMonth}.${tomorrowDay}`;
 
-    // --- 변경된 부분: 오늘 데이터 가져오기 ---
-    const responseToday = await fetch(localApiUrl, {
+    // --- 변경된 부분: 오늘 데이터 직접 가져오기 ---
+    const requestBodyToday = {
+      schDate: todaySchDate,
+      _sbmInfo: { _sbmInfo: { debugMode: 'false' } }
+    };
+    const responseToday = await fetch(externalApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // API 라우트(/api/matchlist/route.js)에서 schDate를 받아서 사용하도록 수정할 예정
-      body: JSON.stringify({ schDate: todaySchDate }),
+      body: JSON.stringify(requestBodyToday),
       next: { revalidate: false },
     });
 
     if (!responseToday.ok) {
       console.error(`Failed to fetch today's data: ${responseToday.status}`);
-      // return {}; // 오늘 데이터 실패 시 에러 처리
-      // throw new Error(`HTTP error! status: ${responseToday.status}`); // 에러 발생 시 전체 중단
+      // 에러 발생 시 빈 배열 반환하여 다음 로직 진행
+      // throw new Error(`HTTP error! status: ${responseToday.status}`); // 에러 시 전체 중단
     }
     const dataToday = await responseToday.json();
     const matchesToday = dataToday.dl_data || [];
 
-    // --- 변경된 부분: 다음 날 데이터 가져오기 ---
-    const responseTomorrow = await fetch(localApiUrl, {
+    // --- 변경된 부분: 다음 날 데이터 직접 가져오기 ---
+    const requestBodyTomorrow = {
+      schDate: tomorrowSchDate,
+      _sbmInfo: { _sbmInfo: { debugMode: 'false' } }
+    };
+    const responseTomorrow = await fetch(externalApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ schDate: tomorrowSchDate }),
+      body: JSON.stringify(requestBodyTomorrow),
       next: { revalidate: false },
     });
 
     if (!responseTomorrow.ok) {
       console.error(`Failed to fetch tomorrow's data: ${responseTomorrow.status}`);
-      // return {}; // 다음 날 데이터 실패 시 에러 처리
-      // throw new Error(`HTTP error! status: ${responseTomorrow.status}`); // 에러 발생 시 전체 중단
+      // 에러 발생 시 빈 배열 반환하여 다음 로직 진행
+      // throw new Error(`HTTP error! status: ${responseTomorrow.status}`); // 에러 시 전체 중단
     }
     const dataTomorrow = await responseTomorrow.json();
+    // console.log("Tomorrow's data:", dataTomorrow); // 디버깅용 로그 유지
     const matchesTomorrow = dataTomorrow.dl_data || [];
 
-    console.log("Today's matches:", matchesToday);
-    console.log("Tomorrow's matches:", matchesTomorrow);
+    // console.log("Today's matches:", matchesToday); // 디버깅용 로그 유지
+    // console.log("Tomorrow's matches:", matchesTomorrow); // 디버깅용 로그 유지
 
     // --- 두 날짜의 경기 데이터 합치기 ---
     let allMatches = [...matchesToday, ...matchesTomorrow];
 
     // 1. 현재 시간 이후의 경기만 필터링
-    // const currentKST = new Date(); // 현재 서버 시간 (KST)
+    const currentKST = new Date(); // 현재 서버 시간 (KST)
 
-    // allMatches = allMatches.filter(match => {
-    //   const matchStartDateTime = parseMatchDateTimeKST(match.MCH_DTM);
-    //   return matchStartDateTime.getTime() > currentKST.getTime(); // 현재 시간보다 미래인 경기만 남김
-    // });
+    allMatches = allMatches.filter(match => {
+      const matchStartDateTime = parseMatchDateTimeKST(match.MCH_DTM);
+      return matchStartDateTime.getTime() > currentKST.getTime(); // 현재 시간보다 미래인 경기만 남김
+    });
 
     // 2. 필터링된 경기를 마감시간(MCH_DTM) 기준으로 정렬
     allMatches.sort((a, b) => {
