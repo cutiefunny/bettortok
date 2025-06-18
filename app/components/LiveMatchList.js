@@ -1,8 +1,26 @@
 import React from 'react';
 
 async function getLiveMatches() {
-  // --- 변경된 부분: 외부 API URL로 직접 변경 ---
-  const externalApiUrl = 'https://www.betman.co.kr/matchinfo/inqMainLivescreMchList.do';
+  // --- 변경된 부분: localApiUrl을 절대 URL로 구성 ---
+  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
+  if (!baseUrl) {
+    // 빌드 타임이나 특정 환경에서 환경 변수가 설정되지 않았을 경우를 대비한 대체
+    // 개발 환경에서는 localhost를, Vercel 환경에서는 자동으로 도메인 설정
+    console.warn("NEXT_PUBLIC_VERCEL_URL is not set. Falling back to default URL.");
+    // 이 부분은 실제 배포 환경에 따라 다르게 설정해야 합니다.
+    // 만약 항상 'https://bettortok.vercel.app'을 기본으로 사용하고 싶다면 직접 지정 가능
+    // 또는 개발 모드에서만 'http://localhost:3000'을 사용하도록 할 수 있습니다.
+    // 여기서는 개발 모드 기준으로 'http://localhost:3000'을 기본값으로 사용합니다.
+    const isDev = process.env.NODE_ENV === 'development';
+    const defaultBaseUrl = isDev ? 'http://localhost:3000' : 'https://bettortok.vercel.app'; // Vercel 배포 도메인으로 변경
+    const localApiUrl = `${defaultBaseUrl}/api/matchlist`;
+    console.log(`Using API URL: ${localApiUrl}`);
+    // return early or throw error if URL cannot be determined
+    // For now, continue with defaultBaseUrl
+  }
+
+  const localApiUrl = `${baseUrl || 'http://localhost:3000'}/api/matchlist`; // 최종적으로 사용될 URL
+  // -------------------------------------------------------------
 
   // KST를 고려하여 Date 객체를 생성하는 헬퍼 함수
   const parseMatchDateTimeKST = (dtmString) => {
@@ -31,55 +49,38 @@ async function getLiveMatches() {
     const tomorrowDay = String(tomorrow.getDate()).padStart(2, '0');
     const tomorrowSchDate = `${tomorrowYear}.${tomorrowMonth}.${tomorrowDay}`;
 
-    // --- 변경된 부분: 오늘 데이터 직접 가져오기 ---
-    const requestBodyToday = {
-      schDate: todaySchDate,
-      _sbmInfo: { _sbmInfo: { debugMode: 'false' } }
-    };
-    const responseToday = await fetch(externalApiUrl, {
+    // 오늘 데이터 가져오기
+    const responseToday = await fetch(localApiUrl, { // localApiUrl 사용
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBodyToday),
+      body: JSON.stringify({ schDate: todaySchDate }), // schDate를 body에 실어 보냄
       next: { revalidate: false },
     });
 
     if (!responseToday.ok) {
-      console.error(`Failed to fetch today's data: ${responseToday.status}`);
-      // 에러 발생 시 빈 배열 반환하여 다음 로직 진행
-      // throw new Error(`HTTP error! status: ${responseToday.status}`); // 에러 시 전체 중단
+      console.error(`Failed to fetch today's data from API route: ${responseToday.status}`);
     }
     const dataToday = await responseToday.json();
     const matchesToday = dataToday.dl_data || [];
 
-    // --- 변경된 부분: 다음 날 데이터 직접 가져오기 ---
-    const requestBodyTomorrow = {
-      schDate: tomorrowSchDate,
-      _sbmInfo: { _sbmInfo: { debugMode: 'false' } }
-    };
-    const responseTomorrow = await fetch(externalApiUrl, {
+    // 다음 날 데이터 가져오기
+    const responseTomorrow = await fetch(localApiUrl, { // localApiUrl 사용
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBodyTomorrow),
+      body: JSON.stringify({ schDate: tomorrowSchDate }), // schDate를 body에 실어 보냄
       next: { revalidate: false },
     });
 
     if (!responseTomorrow.ok) {
-      console.error(`Failed to fetch tomorrow's data: ${responseTomorrow.status}`);
-      // 에러 발생 시 빈 배열 반환하여 다음 로직 진행
-      // throw new Error(`HTTP error! status: ${responseTomorrow.status}`); // 에러 시 전체 중단
+      console.error(`Failed to fetch tomorrow's data from API route: ${responseTomorrow.status}`);
     }
     const dataTomorrow = await responseTomorrow.json();
-    // console.log("Tomorrow's data:", dataTomorrow); // 디버깅용 로그 유지
     const matchesTomorrow = dataTomorrow.dl_data || [];
 
-    // console.log("Today's matches:", matchesToday); // 디버깅용 로그 유지
-    // console.log("Tomorrow's matches:", matchesTomorrow); // 디버깅용 로그 유지
-
-    // --- 두 날짜의 경기 데이터 합치기 ---
     let allMatches = [...matchesToday, ...matchesTomorrow];
 
     // 1. 현재 시간 이후의 경기만 필터링

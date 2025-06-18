@@ -4,13 +4,16 @@ export async function POST(request) {
   try {
     const externalApiUrl = 'https://www.betman.co.kr/matchinfo/inqMainLivescreMchList.do';
 
-    // *** 중요: 여기서 요청 본문(body)에서 schDate를 가져와야 합니다. ***
+    // --- 변경된 부분: 요청 본문에서 schDate를 가져오도록 수정 ---
     const requestBodyFromClient = await request.json(); // 클라이언트에서 보낸 JSON 본문을 파싱
-    let schDate = requestBodyFromClient.schDate; // schDate 값 추출
+    const schDate = requestBodyFromClient.schDate; // schDate 값 추출
 
-    // 만약 schDate가 없으면 기본값 설정 (선택 사항)
+    // schDate가 필수이므로, 없으면 에러 처리 (클라이언트에서 항상 보내야 함)
     if (!schDate) {
-      schDate = `2025.06.19`;
+      return NextResponse.json(
+        { message: 'schDate is required in the request body' },
+        { status: 400 }
+      );
     }
     // ***************************************************************
 
