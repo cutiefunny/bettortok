@@ -187,14 +187,15 @@ main {
 /* LiveMatchList 컴포넌트의 테이블 스타일 (이전과 동일) */
 table {
   width: 100%;
-  border-collapse: collapse; /* 셀 경계선 병합 */
+  border-collapse: collapse;
   margin-top: 0; /* 위쪽 여백 조정 */
-  font-size: 11px;
+  font-size: 10px;
+  text-align: center; /* 테이블 전체 중앙 정렬 */
 }
 
 th, td {
   border: 1px solid #ddd; /* 모든 셀에 경계선 */
-  padding: 8px;
+  padding: 3px;
   text-align: left; /* 기본 텍스트 왼쪽 정렬 */
 }
 
