@@ -180,8 +180,6 @@ main {
   font-weight: bold;
   padding: 8px;
   border: 1px solid #cceeff;
-  margin-top: 15px;
-  margin-bottom: 15px;
 }
 
 /* LiveMatchList 컴포넌트의 테이블 스타일 (이전과 동일) */

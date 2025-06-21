@@ -19,8 +19,7 @@ const parseMatchDateTimeKST = (dtmString) => {
   const minute = parseInt(dtmString.substring(10, 12), 10);
   const second = parseInt(dtmString.substring(12, 14), 10);
 
-  const kstDateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-  // 초는 제외하고 날짜까지만 파싱 (시간 정보는 사용하지 않을 예정이므로)
+  const kstDateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
   return toZonedTime(kstDateString, TIME_ZONE);
 };
 
@@ -73,23 +72,41 @@ async function getLiveMatches() {
 
     const currentKST = toZonedTime(new Date(), TIME_ZONE);
 
+    // gameDateStr을 YYYYMMDDHHmmss 형식으로 변환하는 헬퍼 함수
+    const convertGameDateStrToDtmString = (gameDateStr) => {
+      const match = gameDateStr.match(/(\d{2})\.(\d{2})\.(\d{2}) \(.\) (\d{2}):(\d{2})/);
+      if (match) {
+        const [, year, month, day, hour, minute] = match;
+        const fullYear = `20${year}`; // '25' -> '2025'
+        return `${fullYear}${month}${day}${hour}${minute}00`; // 초는 '00'으로 고정
+      }
+      return null;
+    };
+
     let allMatches = schedules.filter(match => {
-      const matchStartDateTime = parseMatchDateTimeKST(match.gameDateStr.replace(/[^0-9]/g, ''));
+      const dtmStringForParse = convertGameDateStrToDtmString(match.gameDateStr);
+      if (!dtmStringForParse) return false; // 변환 실패 시 필터링
+      
+      const matchStartDateTime = parseMatchDateTimeKST(dtmStringForParse);
       return matchStartDateTime.getTime() > currentKST.getTime();
     });
 
     allMatches.sort((a, b) => {
-      const timeA = parseMatchDateTimeKST(a.gameDateStr.replace(/[^0-9]/g, '')).getTime();
-      const timeB = parseMatchDateTimeKST(b.gameDateStr.replace(/[^0-9]/g, '')).getTime();
+      const dtmStringA = convertGameDateStrToDtmString(a.gameDateStr);
+      const dtmStringB = convertGameDateStrToDtmString(b.gameDateStr);
+
+      if (!dtmStringA || !dtmStringB) return 0; // 변환 실패 시 정렬에 영향 없도록
+
+      const timeA = parseMatchDateTimeKST(dtmStringA).getTime();
+      const timeB = parseMatchDateTimeKST(dtmStringB).getTime();
       return timeA - timeB;
     });
 
     const groupedMatches = {};
 
     allMatches.forEach(match => {
-      const matchDateTime = parseMatchDateTimeKST(match.gameDateStr.replace(/[^0-9]/g, ''));
-      // 경기 시작 시간 (HH:mm)은 그룹 키에서 제외하고 날짜와 요일만 사용
-      const groupKey = format(matchDateTime, 'MM.dd(EEE)', { locale: ko }) + ' 마감';
+      // gameDateStr 전체를 그룹 키로 사용
+      const groupKey = match.gameDateStr + ' 마감';
 
       if (!groupedMatches[groupKey]) {
         groupedMatches[groupKey] = [];
@@ -129,6 +146,7 @@ export default async function LiveMatchList() {
                 <tbody>
                   {groupedMatches[groupKey].map((match, index) => (
                     <tr key={`${match.matchSeq}-${match.gameDateStr}-${index}`} style={{ whiteSpace: 'nowrap' }}>
+                      <td>{match.matchSeq}</td>
                       <td>{match.leagueName}</td>
                       <td>{match.homeName}</td>
                       <td>
