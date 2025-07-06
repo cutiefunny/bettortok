@@ -54,6 +54,8 @@ async function getLiveMatches() {
       next: { revalidate: 10 },
     });
 
+    console.log(`response : ${response}`);
+
     if (!response.ok) {
       console.error(`Failed to fetch data: ${response.status}, ${await response.text()}`);
       return { schedulesList: [], tooltipList: [] };
